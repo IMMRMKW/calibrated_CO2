@@ -1,0 +1,77 @@
+esphome:
+  name: eps32s3ventimate
+  friendly_name: Ventimate
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret ha_api_key
+
+ota:
+  - platform: esphome
+
+wifi:
+  id: esp_wifi
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: !secret ap_ssid
+    password: !secret ap_password
+
+captive_portal:
+
+##### USB Power Delivery #####
+external_components:
+  - source:
+      type: git
+      url: https://github.com/IMMRMKW/calibrated_CO2
+      ref: main
+    components: calibrated_CO2
+    refresh: 10s
+
+##### Hardware ports #####
+
+# For BME280/BME680 and other retrofitted sensor
+i2c:
+  sda: GPIO2
+  scl: GPIO1
+
+
+
+sensor:
+
+  - platform: calibrated_CO2
+    sensor: scd4x_co2
+    default_outdoor_co2: 425
+    get_co2_online: True
+    co2: 
+     name: "calibrated_CO2"
+     id: CO2
+
+  - platform: scd4x
+    address: 0x62
+    temperature_offset: 3
+    update_interval: 5s
+    temperature: 
+      name: SCD4x Temperature
+      internal: true
+    humidity:
+      name: SCD4x Humidity
+      internal: true
+    co2: 
+      name: SCD4x CO2
+      id: scd4x_co2
+
+    
+    
